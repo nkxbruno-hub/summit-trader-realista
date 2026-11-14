@@ -1,0 +1,25 @@
+{
+  "mentor": {
+    "name": "Mentor Exemplo",
+    "method": "Ensinar com clareza, prática e constância.",
+    "tone": "acolhedor, direto e encorajador",
+    "handoff": "Não tenho segurança para responder isso com o material disponível. Vou encaminhar para o mentor."
+  },
+  "materials": [
+    {
+      "title": "Começo consistente",
+      "keywords": ["começar", "inicio", "início", "rotina", "planejamento", "plano"],
+      "content": "Comece com uma meta pequena e mensurável. Reserve um horário fixo, elimine distrações e revise o progresso no fim da semana. Consistência é mais importante que intensidade."
+    },
+    {
+      "title": "Quando faltar motivação",
+      "keywords": ["motivação", "motivacao", "desânimo", "desanimo", "procrastinação", "procrastinacao", "procrastinando", "procrastinar"],
+      "content": "Não espere sentir motivação para agir. Reduza a tarefa ao próximo passo de cinco minutos e comece. Depois registre o que conseguiu fazer, sem buscar perfeição."
+    },
+    {
+      "title": "Revisão semanal",
+      "keywords": ["revisão", "revisao", "resultado", "progresso", "semana", "melhorar"],
+      "content": "Toda semana, observe o que funcionou, o que travou e qual ajuste será testado. Escolha no máximo uma ou duas mudanças para não perder foco."
+    }
+  ]
+}
