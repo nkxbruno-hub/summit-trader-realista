@@ -117,6 +117,7 @@ function landingPage(): string {
       const ticker = document.querySelector(".ticker");
       if (ticker && !document.querySelector("#como-funciona")) ticker.insertAdjacentHTML("afterend", '<section class="how-it-works" id="como-funciona"><div class="wrap"><div class="section-kicker">Sem complicação</div><h2 class="section-title">Um caminho simples para você saber o próximo passo.</h2><p class="section-copy">A mentoria foi pensada para quem cansou de consumir informação solta e quer transformar aprendizado em prática organizada.</p><div class="how-grid"><article class="how-step"><strong>01 · Entender</strong><h3>Você aprende a base</h3><p>Candlestick, contexto, risco e os conceitos que ajudam a enxergar o mercado com mais clareza.</p></article><article class="how-step"><strong>02 · Organizar</strong><h3>Você monta seu plano</h3><p>Leitura, estratégia, entrada, saída e registro: tudo conectado em um processo que pode ser revisado.</p></article><article class="how-step"><strong>03 · Praticar</strong><h3>Você evolui com método</h3><p>Use o diário e a IA Trader Realista para tirar dúvidas, revisar decisões e manter constância.</p></article></div><p class="soft-note">A meta não é acertar todas as operações. É aprender a tomar decisões melhores e mais conscientes ao longo do tempo.</p></div></section>');
       const offer = document.querySelector("#vagas .offer");
+      const spots = offer?.querySelector(".spots");
       const offerTitle = offer?.querySelector("h2");
       const offerCopy = offer?.querySelector("p");
       const offerMicro = offer?.querySelector(".micro");
@@ -139,7 +140,6 @@ function landingPage(): string {
       if (priceDetails) priceDetails.innerHTML = "Mentoria individual online<br/>Acesso à IA Trader Realista por 12 meses";
       const offerKicker = offer?.querySelector(".section-kicker");
       if (offerKicker) offerKicker.textContent = "Condição especial de Black Friday";
-      const spots = offer?.querySelector(".spots");
       if (spots) spots.textContent = "● ACESSO INDIVIDUAL";
       const faq = document.querySelector(".faq");
       if (faq) {
