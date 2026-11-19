@@ -153,6 +153,41 @@ function landingPage(): string {
       chartLook.textContent = '.market-panel svg{background:#29415d!important}.gallery-card svg{background:repeating-linear-gradient(to bottom,transparent 0 30px,#ffffff0d 31px),repeating-linear-gradient(to right,transparent 0 48px,#ffffff08 49px)!important}.chart-grid path{fill:none;stroke:#b6c8d955;stroke-width:1;stroke-dasharray:2 4}.market-panel svg .candle,.market-gallery svg .candle{position:relative}.ma-green{fill:none;stroke:#11e87e;stroke-width:1.5;filter:drop-shadow(0 0 3px #11e87e88)}.ma-orange{fill:none;stroke:#f17b24;stroke-width:1.5;filter:drop-shadow(0 0 3px #f17b2488)}.price-labels text{fill:#e6edf2;font-size:8px;font-family:Arial,sans-serif}';
       document.head.appendChild(chartLook);
       const buyUrl = "${checkoutUrl}";
+      const exitOfferStyle = document.createElement("style");
+      exitOfferStyle.textContent = '.exit-offer{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:20px;background:#020604cc;backdrop-filter:blur(10px)}.exit-offer.is-open{display:grid}.exit-offer-backdrop{position:absolute;inset:0}.exit-offer-panel{position:relative;width:min(520px,100%);padding:34px;border:1px solid #62e58c66;border-radius:24px;background:radial-gradient(circle at 100% 0,#245c3a,#0d1c14 54%,#07100d);box-shadow:0 30px 100px #000c,0 0 0 1px #ffffff0c;color:var(--text);text-align:center;animation:exitOfferIn .24s ease-out}.exit-offer-close{position:absolute;top:12px;right:14px;width:34px;height:34px;border:1px solid #ffffff22;border-radius:50%;background:#ffffff0a;color:var(--text);font-size:1.35rem;cursor:pointer}.exit-offer-kicker{color:var(--gold);font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.exit-offer-panel h2{margin:13px 0 10px;font-size:clamp(1.8rem,5vw,2.7rem);line-height:1;letter-spacing:-.06em}.exit-offer-panel p{margin:0 auto 20px;max-width:410px;color:var(--muted)}.exit-offer-timer{display:inline-flex;gap:5px;align-items:baseline;margin:3px 0 21px;padding:10px 17px;border:1px solid #ffc96b55;border-radius:12px;background:#ffc96b12;color:var(--gold);font-variant-numeric:tabular-nums}.exit-offer-timer strong{font-size:1.55rem;line-height:1}.exit-offer-panel .btn{width:100%;background:var(--green);color:#041109;box-shadow:0 12px 35px #62e58c38}.exit-offer-note{display:block;margin-top:13px;color:#8ca095;font-size:.75rem}@keyframes exitOfferIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}@media(max-width:560px){.exit-offer-panel{padding:30px 20px 24px}.exit-offer-panel h2{font-size:2.05rem}}';
+      document.head.appendChild(exitOfferStyle);
+      const exitOffer = document.createElement("div");
+      exitOffer.className = "exit-offer";
+      exitOffer.setAttribute("aria-hidden", "true");
+      exitOffer.innerHTML = '<div class="exit-offer-backdrop" data-exit-close></div><div class="exit-offer-panel" role="dialog" aria-modal="true" aria-labelledby="exit-offer-title"><button class="exit-offer-close" type="button" data-exit-close aria-label="Fechar oferta">×</button><div class="exit-offer-kicker">Oferta especial de saída</div><h2 id="exit-offer-title">Antes de ir, dê uma chance ao seu processo.</h2><p>Desbloqueie a mentoria individual online por uma condição especial de <strong>R$ 200,00</strong>. Esta condição fica disponível por apenas 5 minutos.</p><div class="exit-offer-timer" aria-label="Tempo restante da oferta"><strong data-exit-minutes>05</strong><span>:</span><strong data-exit-seconds>00</strong></div><a class="btn" data-exit-buy href="' + buyUrl + '" target="_blank" rel="noreferrer">Aproveitar por R$ 200,00</a><small class="exit-offer-note">Conteúdo educacional. Não existe promessa de lucro ou resultado.</small></div>';
+      document.body.appendChild(exitOffer);
+      (() => {
+        const seenKey = "traderrealista_exit_offer_seen";
+        const deadlineKey = "traderrealista_exit_offer_deadline";
+        let timerId = 0;
+        const close = () => { exitOffer.classList.remove("is-open"); exitOffer.setAttribute("aria-hidden", "true"); window.clearInterval(timerId); };
+        const open = () => {
+          if (sessionStorage.getItem(seenKey)) return;
+          let deadline = Number(sessionStorage.getItem(deadlineKey));
+          if (!deadline) { deadline = Date.now() + 5 * 60 * 1000; sessionStorage.setItem(deadlineKey, String(deadline)); }
+          if (deadline <= Date.now()) return;
+          sessionStorage.setItem(seenKey, "1");
+          exitOffer.classList.add("is-open");
+          exitOffer.setAttribute("aria-hidden", "false");
+          const update = () => {
+            const remaining = Math.max(0, deadline - Date.now());
+            const seconds = Math.floor(remaining / 1000);
+            exitOffer.querySelector("[data-exit-minutes]").textContent = String(Math.floor(seconds / 60)).padStart(2, "0");
+            exitOffer.querySelector("[data-exit-seconds]").textContent = String(seconds % 60).padStart(2, "0");
+            if (!remaining) { exitOffer.querySelector("[data-exit-buy]").textContent = "Oferta encerrada"; exitOffer.querySelector("[data-exit-buy]").setAttribute("aria-disabled", "true"); close(); }
+          };
+          update();
+          timerId = window.setInterval(update, 1000);
+        };
+        document.addEventListener("mouseout", (event) => { if (event.clientY <= 0 && !event.relatedTarget) open(); });
+        exitOffer.querySelectorAll("[data-exit-close]").forEach((element) => element.addEventListener("click", close));
+        document.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
+      })();
       const galleryAnchor = document.querySelector(".ecosystem");
       if (galleryAnchor && !document.querySelector(".market-gallery")) {
         galleryAnchor.insertAdjacentHTML("afterend", '<section class="market-gallery"><div class="wrap"><div class="gallery-head"><div><div class="section-kicker">Contexto visual</div><h2 class="section-title">Veja o mercado em dois cenários.</h2><p class="section-copy">Painéis separados para estudar leitura, direção e risco no mini índice e no mini dólar.</p></div><span class="micro">SIMULAÇÃO EDUCACIONAL · SEM RECOMENDAÇÃO</span></div><div class="gallery-grid"><article class="gallery-card"><div class="terminal-meta"><span>WIN · MINI ÍNDICE</span><b style="color:var(--green)">ALTA · +0,42%</b></div><h3>Movimento comprador</h3><p>Exemplo de candles mostrando sequência, correção e retomada.</p><svg viewBox="0 0 320 170" role="img" aria-label="Simulação educacional de candles do mini índice"></svg></article><article class="gallery-card"><div class="terminal-meta"><span>WDO · MINI DÓLAR</span><b style="color:var(--red)">BAIXA · -0,18%</b></div><h3>Movimento vendedor</h3><p>Exemplo de candles mostrando pressão, repique e continuidade.</p><svg viewBox="0 0 320 170" role="img" aria-label="Simulação educacional de candles do mini dólar"></svg></article></div></div></section>');
