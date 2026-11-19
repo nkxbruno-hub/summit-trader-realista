@@ -95,10 +95,14 @@ function landingPage(): string {
       const heroTitle = document.querySelector(".hero h1");
       const heroCopy = document.querySelector(".hero p");
       const heroMicro = document.querySelector(".hero .micro");
+      const secondaryCta = document.querySelector('.hero .btn-secondary');
+      const topPill = document.querySelector('.topbar .pill');
       if (heroEyebrow) heroEyebrow.textContent = "Mentoria individual online";
       if (heroTitle) heroTitle.innerHTML = "Do primeiro passo à sua evolução no <em>trade.</em>";
       if (heroCopy) heroCopy.textContent = "Uma mentoria individual online para entender o trade do zero, construir um processo e avançar com acompanhamento por 12 meses e acesso à IA Trader Realista.";
       if (heroMicro) heroMicro.textContent = "Mentoria online · Acesso à IA por 12 meses · Método prático";
+      if (secondaryCta) { secondaryCta.textContent = "Ver oferta"; secondaryCta.setAttribute("href", "#vagas"); }
+      if (topPill) topPill.textContent = "BLACK FRIDAY · VAGAS LIMITADAS";
       const offer = document.querySelector("#vagas .offer");
       const offerTitle = offer?.querySelector("h2");
       const offerCopy = offer?.querySelector("p");
