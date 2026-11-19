@@ -85,7 +85,7 @@ function landingPage(): string {
         if (!testimonial) return;
         const quote = card.querySelector("blockquote");
         const author = card.querySelector("cite");
-        if (quote) quote.textContent = `“${testimonial[0]}”`;
+        if (quote) quote.textContent = "“" + testimonial[0] + "”";
         if (author) author.textContent = testimonial[1];
       });
     })();
@@ -118,7 +118,7 @@ function landingPage(): string {
       if (spots) spots.textContent = "● ACESSO INDIVIDUAL";
       const faq = document.querySelector(".faq");
       if (faq) {
-        faq.innerHTML = `<details open><summary>Preciso já saber operar?</summary><p>Não. A mentoria começa pela base e avança até a construção de um processo de decisão.</p></details><details><summary>O que está incluído?</summary><p>Mentoria individual online e acesso à IA Trader Realista pelo período de 12 meses.</p></details><details><summary>O programa promete lucro?</summary><p>Não. Trade envolve risco e não existe garantia de resultado. O foco é educação, processo, gestão e tomada de decisão responsável.</p></details><details><summary>Como faço para reservar?</summary><p>Clique em “Garantir minha vaga” e fale com o perfil oficial @traderrealista para confirmar disponibilidade e condições.</p></details>`;
+        faq.innerHTML = "<details open><summary>Preciso já saber operar?</summary><p>Não. A mentoria começa pela base e avança até a construção de um processo de decisão.</p></details><details><summary>O que está incluído?</summary><p>Mentoria individual online e acesso à IA Trader Realista pelo período de 12 meses.</p></details><details><summary>O programa promete lucro?</summary><p>Não. Trade envolve risco e não existe garantia de resultado. O foco é educação, processo, gestão e tomada de decisão responsável.</p></details><details><summary>Como faço para reservar?</summary><p>Clique em “Garantir minha vaga” e fale com o perfil oficial @traderrealista para confirmar disponibilidade e condições.</p></details>";
       }
     })();
     (() => {
