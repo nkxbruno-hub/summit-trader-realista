@@ -67,6 +67,9 @@ function landingPage(): string {
   <footer class="footer wrap"><span>© 2026 Trader Realista · Conteúdo educacional, não recomendação de investimento.</span><a href="https://www.instagram.com/traderrealista/" target="_blank" rel="noreferrer">@traderrealista ↗</a></footer>
   <script>
     (() => {
+      const polish = document.createElement("style");
+      polish.textContent = '.friendly-proof{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:26px}.friendly-proof div{border:1px solid #ffffff14;background:#ffffff06;border-radius:14px;padding:14px 16px}.friendly-proof b{display:block;color:var(--green);font-size:.86rem}.friendly-proof span{display:block;color:var(--muted);font-size:.82rem;margin-top:3px}.how-it-works{background:linear-gradient(180deg,#0d1a15,#07100d)}.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}.how-step{background:#ffffff06;border:1px solid #ffffff12;border-radius:18px;padding:24px}.how-step strong{display:block;color:var(--gold);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}.how-step h3{margin:12px 0 8px}.how-step p{margin:0;color:var(--muted);font-size:.94rem}.soft-note{color:var(--muted);font-size:.9rem;max-width:650px;margin-top:18px}.offer .btn-primary{width:100%;font-size:1rem;padding:17px}.offer .micro{text-align:center}.mobile-cta{display:none}@media(max-width:800px){.friendly-proof,.how-grid{grid-template-columns:1fr}.mobile-cta{display:flex;position:fixed;bottom:14px;left:14px;right:14px;z-index:9;justify-content:center;background:var(--green);color:#041109;border-radius:12px;padding:14px 18px;font-weight:900;box-shadow:0 12px 30px #0008}.footer{padding-bottom:88px}}';
+      document.head.appendChild(polish);
       const track = document.querySelector("[data-review-track]");
       const previous = document.querySelector("[data-review-prev]");
       const next = document.querySelector("[data-review-next]");
@@ -103,6 +106,16 @@ function landingPage(): string {
       if (heroMicro) heroMicro.textContent = "Mentoria online · Acesso à IA por 12 meses · Método prático";
       if (secondaryCta) { secondaryCta.textContent = "Ver oferta"; secondaryCta.setAttribute("href", "#vagas"); }
       if (topPill) topPill.textContent = "BLACK FRIDAY · VAGAS LIMITADAS";
+      if (heroEyebrow) heroEyebrow.textContent = "Mentoria individual online · para começar com direção";
+      if (heroTitle) heroTitle.innerHTML = "Pare de operar no escuro. Comece a construir seu <em>processo.</em>";
+      if (heroCopy) heroCopy.textContent = "Voc\u00ea n\u00e3o precisa saber tudo para come\u00e7ar \u2014 precisa de uma sequ\u00eancia clara. Aprenda a ler o mercado, organizar suas decis\u00f5es e praticar com mais consci\u00eancia, com mentoria individual e IA Trader Realista por 12 meses.";
+      if (heroMicro) heroMicro.textContent = "Do b\u00e1sico ao plano de opera\u00e7\u00e3o \u00b7 linguagem simples \u00b7 sem promessa de lucro";
+      if (secondaryCta) { secondaryCta.textContent = "Como funciona"; secondaryCta.setAttribute("href", "#como-funciona"); }
+      if (topPill) topPill.textContent = "BLACK FRIDAY · CONDIÇÃO ESPECIAL";
+      const heroWrap = document.querySelector(".hero .wrap");
+      if (heroWrap && !document.querySelector(".friendly-proof")) heroWrap.insertAdjacentHTML("beforeend", '<div class="friendly-proof"><div><b>Começa do zero</b><span>Sem precisar já operar.</span></div><div><b>Plano passo a passo</b><span>Você sabe o que estudar.</span></div><div><b>12 meses de IA</b><span>Suporte para continuar praticando.</span></div></div>');
+      const ticker = document.querySelector(".ticker");
+      if (ticker && !document.querySelector("#como-funciona")) ticker.insertAdjacentHTML("afterend", '<section class="how-it-works" id="como-funciona"><div class="wrap"><div class="section-kicker">Sem complicação</div><h2 class="section-title">Um caminho simples para você saber o próximo passo.</h2><p class="section-copy">A mentoria foi pensada para quem cansou de consumir informação solta e quer transformar aprendizado em prática organizada.</p><div class="how-grid"><article class="how-step"><strong>01 · Entender</strong><h3>Você aprende a base</h3><p>Candlestick, contexto, risco e os conceitos que ajudam a enxergar o mercado com mais clareza.</p></article><article class="how-step"><strong>02 · Organizar</strong><h3>Você monta seu plano</h3><p>Leitura, estratégia, entrada, saída e registro: tudo conectado em um processo que pode ser revisado.</p></article><article class="how-step"><strong>03 · Praticar</strong><h3>Você evolui com método</h3><p>Use o diário e a IA Trader Realista para tirar dúvidas, revisar decisões e manter constância.</p></article></div><p class="soft-note">A meta não é acertar todas as operações. É aprender a tomar decisões melhores e mais conscientes ao longo do tempo.</p></div></section>');
       const offer = document.querySelector("#vagas .offer");
       const offerTitle = offer?.querySelector("h2");
       const offerCopy = offer?.querySelector("p");
@@ -111,6 +124,10 @@ function landingPage(): string {
       const priceNew = offer?.querySelector(".price strong");
       const priceDetails = offer?.querySelector(".price span");
       if (offerTitle) offerTitle.innerHTML = "Mentoria individual.<br/>Seu processo começa agora.";
+      if (offerTitle) offerTitle.innerHTML = "Comece com dire\u00e7\u00e3o.<br/>Evolua com consist\u00eancia.";
+      if (offerCopy) offerCopy.textContent = "Uma condi\u00e7\u00e3o especial para aprender com clareza, organizar seu processo e ter uma ferramenta de apoio durante 12 meses. Voc\u00ea entra para construir base \u2014 n\u00e3o para perseguir promessa f\u00e1cil.";
+      if (offerMicro) offerMicro.textContent = "Fale com o perfil oficial para confirmar disponibilidade e receber os pr\u00f3ximos passos.";
+      if (spots) spots.textContent = "● CONDIÇÃO ESPECIAL DE BLACK FRIDAY";
       const offerSection = document.querySelector("#vagas");
       if (offerSection) {
         offerSection.insertAdjacentHTML("beforebegin", '<section class="dark mentor-path"><div class="wrap"><div class="section-kicker">O que você recebe</div><h2 class="section-title">Um caminho claro para construir consistência.</h2><p class="section-copy">Materiais e etapas para organizar seus estudos, registrar decisões e evoluir com responsabilidade.</p><div class="cards"><article class="card"><div class="num">01</div><h3>Manual 1x1x1 de Consistência</h3><p>Um método simples para transformar intenção em rotina: uma prioridade, uma decisão e um registro por vez.</p></article><article class="card"><div class="num">02</div><h3>Diário do Trader Disciplinado</h3><p>Um espaço para registrar contexto, entrada, saída, risco, emoções e aprendizados de cada operação.</p></article><article class="card"><div class="num">03</div><h3>Plano da mentoria</h3><p>Da leitura do candlestick e fundamentos até estratégia, gestão, prática guiada e evolução rumo ao primeiro mês positivo.</p></article></div><div class="trust-list"><div class="trust-item"><b>Etapa 1 · Fundamentos</b>Entenda o que é um candlestick, preço, contexto e risco.</div><div class="trust-item"><b>Etapa 2 · Leitura e estratégia</b>Conecte cenário, entrada, saída e regras testáveis.</div><div class="trust-item"><b>Etapa 3 · Prática disciplinada</b>Use o diário para revisar decisões e reduzir o improviso.</div><div class="trust-item"><b>Etapa 4 · Evolução</b>Construa uma rotina de revisão e acompanhe sua jornada até o primeiro mês positivo.</div></div></div></section>');
@@ -130,6 +147,9 @@ function landingPage(): string {
       }
     })();
     (() => {
+      const faq = document.querySelector(".faq");
+      if (faq) faq.innerHTML = "<details open><summary>Preciso j\u00e1 saber operar?</summary><p>N\u00e3o. A mentoria come\u00e7a pela base e avan\u00e7a at\u00e9 a constru\u00e7\u00e3o de um processo de decis\u00e3o.</p></details><details><summary>O que est\u00e1 inclu\u00eddo?</summary><p>Mentoria individual online e acesso \u00e0 IA Trader Realista pelo per\u00edodo de 12 meses.</p></details><details><summary>E se eu tiver pouco tempo?</summary><p>O plano \u00e9 organizado em passos objetivos para voc\u00ea estudar, registrar e revisar no seu ritmo.</p></details><details><summary>O programa promete lucro?</summary><p>N\u00e3o. Trade envolve risco e n\u00e3o existe garantia de resultado. O foco \u00e9 educa\u00e7\u00e3o, processo, gest\u00e3o e tomada de decis\u00e3o respons\u00e1vel.</p></details><details><summary>Como fa\u00e7o para come\u00e7ar?</summary><p>Clique em “Garantir minha vaga” e fale com o perfil oficial @traderrealista para confirmar disponibilidade e condi\u00e7\u00f5es.</p></details>";
+      if (!document.querySelector(".mobile-cta")) document.body.insertAdjacentHTML("beforeend", '<a class="mobile-cta" href="#vagas">Quero conhecer a mentoria</a>');
       const banner = document.querySelector(".countdown");
       if (!banner) return;
       const deadline = new Date(banner.dataset.deadline).getTime();
