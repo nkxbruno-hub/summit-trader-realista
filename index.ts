@@ -35,8 +35,59 @@ await loadDotEnv();
 const port = Number(process.env.PORT ?? 3000);
 const students = new Map<string, StudentProfile>();
 const processedMessageIds = new Set<string>();
+const exitOfferSeenByIp = new Map<string, number>();
+const rateLimitBuckets = new Map<string, number[]>();
+const EXIT_OFFER_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const MAX_BODY_BYTES = 64 * 1024;
 
-function landingPage(): string {
+function clientIp(request: IncomingMessage): string {
+  const forwarded = request.headers["x-forwarded-for"];
+  const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  return (value?.split(",")[0].trim() || request.socket.remoteAddress || "unknown").slice(0, 128);
+}
+
+function hasSeenExitOffer(request: IncomingMessage): boolean {
+  const cookie = Array.isArray(request.headers.cookie) ? request.headers.cookie.join(";") : request.headers.cookie ?? "";
+  if (/(^|;\s*)tr_exit_offer_seen=1(?:;|$)/.test(cookie)) return true;
+  const seenAt = exitOfferSeenByIp.get(clientIp(request));
+  if (!seenAt) return false;
+  if (Date.now() - seenAt > EXIT_OFFER_TTL_MS) {
+    exitOfferSeenByIp.delete(clientIp(request));
+    return false;
+  }
+  return true;
+}
+
+function claimExitOffer(request: IncomingMessage): boolean {
+  const ip = clientIp(request);
+  if (hasSeenExitOffer(request)) return false;
+  exitOfferSeenByIp.set(ip, Date.now());
+  if (exitOfferSeenByIp.size > 10000) {
+    const oldest = [...exitOfferSeenByIp.entries()].sort((a, b) => a[1] - b[1])[0];
+    if (oldest) exitOfferSeenByIp.delete(oldest[0]);
+  }
+  return true;
+}
+
+function isRateLimited(request: IncomingMessage, bucket: string, limit: number, windowMs: number): boolean {
+  const key = `${bucket}:${clientIp(request)}`;
+  const now = Date.now();
+  const recent = (rateLimitBuckets.get(key) ?? []).filter((time) => now - time < windowMs);
+  recent.push(now);
+  rateLimitBuckets.set(key, recent);
+  return recent.length > limit;
+}
+
+const securityHeaders = {
+  "content-security-policy": "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; form-action 'self' https://payfast.greenn.com.br https://www.instagram.com",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(), payment=(self)",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "x-content-type-options": "nosniff",
+  "x-frame-options": "DENY",
+  "cross-origin-opener-policy": "same-origin"
+};
+
+function landingPage(options: { exitOfferBlocked: boolean }): string {
   const checkoutUrl = process.env.CHECKOUT_URL ?? "https://payfast.greenn.com.br/205806/offer/nXYAha";
   const exitCheckoutUrl = process.env.EXIT_CHECKOUT_URL ?? "https://payfast.greenn.com.br/205806/offer/zM8TUT";
   return `<!doctype html>
@@ -155,6 +206,7 @@ function landingPage(): string {
       document.head.appendChild(chartLook);
       const buyUrl = "${checkoutUrl}";
       const exitBuyUrl = "${exitCheckoutUrl}";
+      const exitOfferBlocked = ${options.exitOfferBlocked ? "true" : "false"};
       const exitOfferStyle = document.createElement("style");
       exitOfferStyle.textContent = '.exit-offer{position:fixed;inset:0;z-index:50;display:none;place-items:center;padding:20px;background:#020604cc;backdrop-filter:blur(10px)}.exit-offer.is-open{display:grid}.exit-offer-backdrop{position:absolute;inset:0}.exit-offer-panel{position:relative;width:min(520px,100%);padding:34px;border:1px solid #62e58c66;border-radius:24px;background:radial-gradient(circle at 100% 0,#245c3a,#0d1c14 54%,#07100d);box-shadow:0 30px 100px #000c,0 0 0 1px #ffffff0c;color:var(--text);text-align:center;animation:exitOfferIn .24s ease-out}.exit-offer-close{position:absolute;top:12px;right:14px;width:34px;height:34px;border:1px solid #ffffff22;border-radius:50%;background:#ffffff0a;color:var(--text);font-size:1.35rem;cursor:pointer}.exit-offer-kicker{color:var(--gold);font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.exit-offer-panel h2{margin:13px 0 10px;font-size:clamp(1.8rem,5vw,2.7rem);line-height:1;letter-spacing:-.06em}.exit-offer-panel p{margin:0 auto 20px;max-width:410px;color:var(--muted)}.exit-offer-timer{display:inline-flex;gap:5px;align-items:baseline;margin:3px 0 21px;padding:10px 17px;border:1px solid #ffc96b55;border-radius:12px;background:#ffc96b12;color:var(--gold);font-variant-numeric:tabular-nums}.exit-offer-timer strong{font-size:1.55rem;line-height:1}.exit-offer-panel .btn{width:100%;background:var(--green);color:#041109;box-shadow:0 12px 35px #62e58c38}.exit-offer-note{display:block;margin-top:13px;color:#8ca095;font-size:.75rem}@keyframes exitOfferIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}@media(max-width:560px){.exit-offer-panel{padding:30px 20px 24px}.exit-offer-panel h2{font-size:2.05rem}}';
       document.head.appendChild(exitOfferStyle);
@@ -168,8 +220,18 @@ function landingPage(): string {
         const deadlineKey = "traderrealista_exit_offer_deadline";
         let timerId = 0;
         const close = () => { exitOffer.classList.remove("is-open"); exitOffer.setAttribute("aria-hidden", "true"); window.clearInterval(timerId); };
-        const open = () => {
-          if (sessionStorage.getItem(seenKey)) return;
+        let claimInFlight = false;
+        const open = async () => {
+          if (exitOfferBlocked || sessionStorage.getItem(seenKey) || claimInFlight) return;
+          claimInFlight = true;
+          try {
+            const claim = await fetch("/api/exit-offer/claim", { method: "POST", headers: { "accept": "application/json" }, credentials: "same-origin" });
+            if (!claim.ok) return;
+          } catch {
+            return;
+          } finally {
+            claimInFlight = false;
+          }
           let deadline = Number(sessionStorage.getItem(deadlineKey));
           if (!deadline) { deadline = Date.now() + 5 * 60 * 1000; sessionStorage.setItem(deadlineKey, String(deadline)); }
           if (deadline <= Date.now()) return;
@@ -316,18 +378,23 @@ async function jsonBody(request: IncomingMessage): Promise<Record<string, unknow
 
 async function rawBody(request: IncomingMessage): Promise<string> {
   let body = "";
-  for await (const chunk of request) body += chunk;
+  let size = 0;
+  for await (const chunk of request) {
+    size += Buffer.byteLength(chunk as string | Uint8Array);
+    if (size > MAX_BODY_BYTES) throw new Error("request_body_too_large");
+    body += chunk;
+  }
   return body;
 }
 
 function send(response: ServerResponse, status: number, payload: unknown): void {
-  response.writeHead(status, { "content-type": "application/json; charset=utf-8" });
+  response.writeHead(status, { ...securityHeaders, "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
   response.end(JSON.stringify(payload));
 }
 
 function isValidMetaSignature(raw: string, signature: string | undefined): boolean {
   const secret = process.env.META_APP_SECRET;
-  if (!secret) return true;
+  if (!secret) return false;
   if (!signature?.startsWith("sha256=")) return false;
   const expected = createHmac("sha256", secret).update(raw).digest("hex");
   const received = signature.slice("sha256=".length);
@@ -382,20 +449,29 @@ async function processWhatsAppWebhook(body: Record<string, unknown>): Promise<vo
 const server = createServer(async (request, response) => {
   try {
     if (request.method === "GET" && (request.url === "/" || request.url === "/index.html")) {
-      response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
-      return response.end(landingPage());
+      response.writeHead(200, { ...securityHeaders, "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+      return response.end(landingPage({ exitOfferBlocked: hasSeenExitOffer(request) }));
     }
     if (request.method === "GET" && request.url === "/health") return send(response, 200, { ok: true });
+    if (request.method === "POST" && request.url === "/api/exit-offer/claim") {
+      if (isRateLimited(request, "exit-offer", 5, 10 * 60 * 1000)) return send(response, 429, { error: "Tente novamente mais tarde." });
+      if (!claimExitOffer(request)) return send(response, 409, { claimed: false });
+      response.writeHead(200, { ...securityHeaders, "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "set-cookie": `tr_exit_offer_seen=1; Max-Age=${EXIT_OFFER_TTL_MS / 1000}; Path=/; HttpOnly; Secure; SameSite=Lax` });
+      return response.end(JSON.stringify({ claimed: true }));
+    }
     if (request.method === "POST" && request.url === "/chat") {
+      if (isRateLimited(request, "chat", 30, 5 * 60 * 1000)) return send(response, 429, { error: "Muitas solicitações. Tente novamente em alguns minutos." });
       const body = await jsonBody(request);
       const message = typeof body.message === "string" ? body.message.trim() : "";
       const profile = (body.profile ?? {}) as StudentProfile;
       if (!message) return send(response, 400, { error: "Envie uma mensagem em 'message'." });
+      if (message.length > 4000) return send(response, 413, { error: "Mensagem muito longa." });
       const material = selectMaterial(message);
       const answer = await ollamaReply(message, profile, material) ?? fallbackReply(message, profile);
       return send(response, 200, { answer, mentor: data.mentor.name, material: material?.title ?? null, maxLines: 4 });
     }
     if (request.method === "POST" && request.url === "/webhook/whatsapp") {
+      if (isRateLimited(request, "whatsapp", 60, 60 * 1000)) return send(response, 429, { error: "Muitas solicitações." });
       const raw = await rawBody(request);
       const signatureHeader = request.headers["x-hub-signature-256"];
       const signature = Array.isArray(signatureHeader) ? signatureHeader[0] : signatureHeader;
@@ -411,7 +487,7 @@ const server = createServer(async (request, response) => {
       const token = url.searchParams.get("hub.verify_token");
       const challenge = url.searchParams.get("hub.challenge");
       if (mode === "subscribe" && token === process.env.WHATSAPP_VERIFY_TOKEN && challenge) {
-        response.writeHead(200, { "content-type": "text/plain" });
+        response.writeHead(200, { ...securityHeaders, "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" });
         return response.end(challenge);
       }
       return send(response, 403, { error: "Verificação inválida." });
