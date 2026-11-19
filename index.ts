@@ -295,7 +295,7 @@ async function processWhatsAppWebhook(body: Record<string, unknown>): Promise<vo
 const server = createServer(async (request, response) => {
   try {
     if (request.method === "GET" && (request.url === "/" || request.url === "/index.html")) {
-      response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" });
+      response.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
       return response.end(landingPage());
     }
     if (request.method === "GET" && request.url === "/health") return send(response, 200, { ok: true });
