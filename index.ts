@@ -75,6 +75,53 @@ function landingPage(): string {
       next?.addEventListener("click", () => track?.scrollBy({ left: step(), behavior: "smooth" }));
     })();
     (() => {
+      const testimonials = [
+        ["Com o ensinamento do Bruno consegui ter o meu primeiro ano positivo.", "Guilherme Vasconcelos"],
+        ["Após o treinamento do Trader Realista, fechei o meu primeiro mês positivo. Estou muito feliz.", "Marcia Costa"],
+        ["Com o treinamento finalmente entendi que não preciso estar 100% certo o tempo todo.", "Felipe Araujo"]
+      ];
+      document.querySelectorAll(".review-card").forEach((card, index) => {
+        const testimonial = testimonials[index];
+        if (!testimonial) return;
+        const quote = card.querySelector("blockquote");
+        const author = card.querySelector("cite");
+        if (quote) quote.textContent = `“${testimonial[0]}”`;
+        if (author) author.textContent = testimonial[1];
+      });
+    })();
+    (() => {
+      document.querySelector("#agenda")?.remove();
+      const heroEyebrow = document.querySelector(".hero .eyebrow");
+      const heroTitle = document.querySelector(".hero h1");
+      const heroCopy = document.querySelector(".hero p");
+      const heroMicro = document.querySelector(".hero .micro");
+      if (heroEyebrow) heroEyebrow.textContent = "Mentoria individual online";
+      if (heroTitle) heroTitle.innerHTML = "Do primeiro passo à sua evolução no <em>trade.</em>";
+      if (heroCopy) heroCopy.textContent = "Uma mentoria individual online para entender o trade do zero, construir um processo e avançar com acompanhamento por 12 meses e acesso à IA Trader Realista.";
+      if (heroMicro) heroMicro.textContent = "Mentoria online · Acesso à IA por 12 meses · Método prático";
+      const offer = document.querySelector("#vagas .offer");
+      const offerTitle = offer?.querySelector("h2");
+      const offerCopy = offer?.querySelector("p");
+      const offerMicro = offer?.querySelector(".micro");
+      const priceOld = offer?.querySelector(".price small");
+      const priceNew = offer?.querySelector(".price strong");
+      const priceDetails = offer?.querySelector(".price span");
+      if (offerTitle) offerTitle.innerHTML = "Mentoria individual.<br/>Seu processo começa agora.";
+      if (offerCopy) offerCopy.textContent = "Uma condição especial para entrar na mentoria individual online Trader Realista com acesso à IA Trader Realista durante 12 meses.";
+      if (offerMicro) offerMicro.textContent = "Vagas e condições confirmadas pelo canal oficial.";
+      if (priceOld) priceOld.textContent = "De R$ 15.000,00";
+      if (priceNew) priceNew.textContent = "R$ 297,00";
+      if (priceDetails) priceDetails.innerHTML = "Mentoria individual online<br/>Acesso à IA Trader Realista por 12 meses";
+      const offerKicker = offer?.querySelector(".section-kicker");
+      if (offerKicker) offerKicker.textContent = "Condição especial de Black Friday";
+      const spots = offer?.querySelector(".spots");
+      if (spots) spots.textContent = "● ACESSO INDIVIDUAL";
+      const faq = document.querySelector(".faq");
+      if (faq) {
+        faq.innerHTML = `<details open><summary>Preciso já saber operar?</summary><p>Não. A mentoria começa pela base e avança até a construção de um processo de decisão.</p></details><details><summary>O que está incluído?</summary><p>Mentoria individual online e acesso à IA Trader Realista pelo período de 12 meses.</p></details><details><summary>O programa promete lucro?</summary><p>Não. Trade envolve risco e não existe garantia de resultado. O foco é educação, processo, gestão e tomada de decisão responsável.</p></details><details><summary>Como faço para reservar?</summary><p>Clique em “Garantir minha vaga” e fale com o perfil oficial @traderrealista para confirmar disponibilidade e condições.</p></details>`;
+      }
+    })();
+    (() => {
       const banner = document.querySelector(".countdown");
       if (!banner) return;
       const deadline = new Date(banner.dataset.deadline).getTime();
